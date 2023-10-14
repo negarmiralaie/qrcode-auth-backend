@@ -7,13 +7,11 @@ const PersonSchema = new mongoose.Schema({
     fname: {
         type: String,
         required: true,
-        maxlength: 32,
         trim: true,
     },
     lname: {
         type: String,
         required: true,
-        maxlength: 32,
         trim: true,
     },
     username: {
@@ -24,15 +22,14 @@ const PersonSchema = new mongoose.Schema({
     password: {
         type: String,
         required: true,
-        minlength: 8,
     },
-    // date: {
-    //     type: Date,
-    //     default: Date.now(),
-    // },
     qrcodes: [{
         type: mongoose.Types.ObjectId,
         ref: 'qrcode',
+    }],
+    vacations: [{
+        type: mongoose.Types.ObjectId,
+        ref: 'vacation',
     }],
     role: {
         type: String,

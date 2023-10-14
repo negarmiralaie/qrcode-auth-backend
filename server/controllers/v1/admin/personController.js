@@ -68,10 +68,12 @@ const personController = {
                 role: joi.string().required(),
             });
 
+            const body = req.body;
+            console.log('body', body);
             
             const { error, value } = schema.validate(req.body, { abortEarly: true });
             if (error) {
-                return res.status(400).json({message: 'Input is invalid', error});
+                return res.status(400).json({body, message: 'Input is invalid', error});
             }
             
             console.log('value', value)
@@ -90,6 +92,7 @@ const personController = {
             const person = await db.create(value);
             return res.status(200).json({message: 'Person is successfully created', person});
         } catch (error) {
+            console.log('error: ', error);
             return res.status(500).json({message: 'An error occurred', error});
         }
     },

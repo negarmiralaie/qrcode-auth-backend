@@ -10,7 +10,10 @@ class ExtraHandler {
     } 
     
     static async generateUniqueUsername() {
-        let username = generateRandomNumber().toString();
+        const min = 1000000000; // minimum 10-digit number
+        const max = 9999999999; // maximum 10-digit number
+        const randomNum = Math.floor(Math.random() * (max - min + 1)) + min;
+        let username = randomNum.toString();
 
         // Check if the username already exists in the database
         const existingPerson = await Person.findOne({ username });

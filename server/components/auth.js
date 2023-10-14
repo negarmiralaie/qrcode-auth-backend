@@ -54,13 +54,20 @@ class AuthHandler {
 //     });
 //   }
 
-    static async TokenGen(person, type = 'person') {
+    static async TokenGen(username, type = 'person') {
+        const expiresIn = '2d';
         const accessToken = jwt.sign({ _type: type }, this.tokenKey, {
-            subject: person.id + '',
-            expiresIn: '2d',
+            subject: username,
+            expiresIn,
         });
 
-        return accessToken;
+        const decoded = jwt.verify(accessToken, this.tokenKey,);
+        const expirationDate = new Date(decoded.exp * 1000);
+        console.log('Expiration Date:', expirationDate);
+
+        console.log('accessToken: ', accessToken)
+
+        return {accessToken, expirationDate};
     }
 
     static async Compare(password, Hash){

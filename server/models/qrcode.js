@@ -1,27 +1,29 @@
 const mongoose = require('mongoose');
 
 const QrcodeSchema = new mongoose.Schema({
-    qrcodeUrl: {
-        type: String,
-        required: true,
-        maxlength: 32,
+    isEntrance: {
+        type: Boolean,
+    },
+    entranceDate: {
+        type: Date,
         trim: true,
     },
-    creationDate: {
-        type: String,
-        required: true,
-        maxlength: 32,
+    exitDate: {
+        type: Date,
         trim: true,
     },
-    expirationDate: {
-        type: String,
-        required: true,
+    workDuration: {
+        type: Date,
+        trim: true,
+    },
+    latency: {
+        type: Date,
         trim: true,
     },
     person: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
-        ref: 'person',
+        ref: 'Person',
     },
 });
 
