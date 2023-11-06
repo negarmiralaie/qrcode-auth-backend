@@ -4,6 +4,9 @@ const joi = require('joi');
 const db = require('../../../models/person');
 const AuthHandler = require('../../../components/auth');
 const ExtraHandler = require('../../../components/extra');
+const moment = require('moment-jalaali');
+const qrcodeDb = require('../../../models/qrcode');
+const vacationDb = require('../../../models/vacation');
 
 const personController = {
     listPeople: async (req, res) => {
@@ -110,6 +113,181 @@ const personController = {
         return res.status(200).json({message: 'Person is successfully found', person});
         } catch (error) {
             return response.catchError(res, error);
+        }
+    },
+
+    report: async (req, res) => {
+        try {
+            // const { personId } = req.params;
+            const { username, persianStartDate, persianEndDate } = req.query;
+
+            //& convert the Persian dates to Gregorian dates.
+            const startDate = persianStartDate ? moment(persianStartDate, 'jYYYY/jMM/jDD').format('YYYY-MM-DD') : undefined;
+            const endDate = persianEndDate ? moment(persianEndDate, 'jYYYY/jMM/jDD').format('YYYY-MM-DD') : undefined;
+
+// **********************************************************************
+
+
+
+
+
+
+
+
+
+
+
+const vacationFilter = {};
+// if (startDate) vacationFilter.entranceDate = { $gte: startDate };
+// if (endDate) vacationFilter.entranceDate = { ...(vacationFilter.vacationDate || {}), $lte: endDate };
+if (username) {
+  const person = await db.findOne({ username });
+  const personId = person._id;
+  console.log('personId: ', personId);
+  if (personId) vacationFilter.person = personId;
+}
+
+console.log('vacationFilter: ', vacationFilter);
+const vacations = await vacationDb.find(vacationFilter).populate('person').exec();
+
+// Count the number of hourly vacations
+vacationFilter.type = 'hourly';
+vacationFilter.status = 'accepted';
+const amountOfHourlyVacations = await vacationDb.countDocuments(vacationFilter);
+console.log('amountOfHourlyVacations: ', amountOfHourlyVacations);
+
+// Calculate the total duration of vacations
+vacationFilter.type = 'hourly';
+const sumOfVacationsDuration = await vacationDb.aggregate([
+  { $match: vacationFilter },
+  { $group: { _id: null, totalDuration: { $sum: { $toInt: "$duration" } } } }
+]);
+
+// Count the number of daily vacations
+vacationFilter.type = 'daily';
+const amountOfDailyVacations = await vacationDb.countDocuments(vacationFilter);
+console.log('amountOfDailyVacations: ', amountOfDailyVacations);
+
+
+
+
+
+
+
+
+
+
+
+            // Create a filter object based on the provided parameters
+            // const vacationFilter = {};
+            // // if (startDate) vacationFilter.entranceDate = { $gte: startDate };
+            // // if (endDate) vacationFilter.entranceDate = { ...(vacationFilter.vacationDate || {}), $lte: endDate };
+            // if(username){
+            //     const person = await db.findOne({ username });
+            //     const personId = person._id;
+            //     console.log('personId: ', personId);
+            //     if (personId) vacationFilter.person = personId;
+            // }
+            
+            // console.log('vacationFilter: ', vacationFilter);
+            // const vacations = await vacationDb.find(vacationFilter).populate('person').exec();
+
+
+            // // & GET HOW MANY HOURLY VACATIONS EXIST..
+            // // & تعداد دفعات مرخصی ساعتی
+            // vacationFilter.type = 'hourly';
+            // const amountOfHourlyVacations = await vacationDb.countDocuments(vacationFilter);
+            // console.log('amountOfHourlyVacations: ', amountOfHourlyVacations);
+
+            // // &
+            // vacationFilter.type = 'hourly';
+
+            // const sumOfVacationsDuration = await vacationDb.aggregate([
+            //     { $match: vacationFilter },
+            //     { $group: { _id: null, totalDuration: { $sum: { $toInt: "$duration" } } } }
+            // ]);
+
+
+            // // & GET HOW MANY HOURLY VACATIONS EXIST..
+            // // & تعداد دفعات مرخصی روزانه
+            // vacationFilter.type = 'daily';
+            // const amountOfDailyVacations = await vacationDb.countDocuments(vacationFilter);
+            // console.log('amountOfDailyVacations: ', amountOfDailyVacations);
+
+            // // &
+
+            console.log('sumOfVacationsDuration: ', sumOfVacationsDuration);
+// **********************************************************************
+            const qrcodeFilter = {};
+            if (startDate) qrcodeFilter.entranceDate = { $gte: startDate };
+            if (endDate) qrcodeFilter.entranceDate = { ...(qrcodeFilter.vacationDate || {}), $lte: endDate };
+            if(username){
+                const person = await db.findOne({ username });
+                const personId = person._id;
+                console.log('personId: ', personId);
+                if (personId) qrcodeFilter.person = personId;
+            }
+            // if (personId) qrcodeFilter.person = personId;
+            console.log('qrcodeFilter: ', qrcodeFilter);
+
+            // const qrcodes = await qrcodeDb.find(qrcodeFilter).populate('person').exec();
+
+
+
+
+
+
+
+
+
+
+            // const qrcodes = await qrcodeDb.aggregate([
+            //     { $match: qrcodeFilter },
+            //     {
+            //         $group: {
+            //             _id: null,
+            //             totalWorkDuration: { $sum: "$workDurations" }
+            //         }
+            //     }
+            // ]).exec();
+
+            // const qrcodes = await qrcodeDb.aggregate([
+            // { $match: qrcodeFilter },
+            //     {
+            //         $group: {
+            //         _id: null,
+            //         totalWorkDuration: { $sum: "$workDurations" },
+            //         totalLatencyHours: { $sum: "$latencyHours" }
+            //         }
+            //     }
+            // ]);
+
+            const qrcodes = await qrcodeDb.aggregate([
+                {
+                  $group: {
+                    _id: null,
+                    totalWorkDuration: { $sum: "$workDurations" },
+                    totalLatencyHours: { $sum: "$latencyHours" }
+                  }
+                }
+            ])              
+
+            console.log('qrcodes: ', qrcodes);
+
+// **********************************************************************
+
+
+            return res.status(200).json({
+                message: 'Report is fetched',
+                qrcodes,
+                vacations,
+                amountOfHourlyVacations,
+                amountOfDailyVacations,
+                sumOfVacationsDuration,
+
+            });
+        } catch (error) {
+            throw createError(404, 'Report could not be fetched', error);
         }
     },
 };

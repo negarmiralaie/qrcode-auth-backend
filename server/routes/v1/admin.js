@@ -20,6 +20,9 @@ router.get('/history/:personId', qrcodeController.history); //?
 //* /api/v1/admin/history
 router.get('/history', qrcodeController.historyOfAllPeople); //?
 
+//* /api/v1/admin/report
+router.get('/report', personController.report); //?
+
 // * /api/v1/admin/people
 router.get('/people', personController.listPeople); //?
 
@@ -32,8 +35,8 @@ router.get('/person/:username', personController.getPersonById); //?
 //* /api/v1/admin/vacation/:personId
 router.post('/vacation/:personId', vacationController.create); //?
 
-//* /api/v1/admin/vacation/:personId
-router.put('/vacation/:personId', vacationController.update); //?
+//* /api/v1/admin/vacation
+router.put('/vacation', vacationController.update); //?
 
 //* /api/v1/admin/vacations/:personId
 router.get('/vacations/:personId', vacationController.getVacationsById); //?

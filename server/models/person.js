@@ -39,11 +39,11 @@ const PersonSchema = new mongoose.Schema({
 
 PersonSchema.pre('save', async function hashPassword(next) {
     try {
-        if (this.isModified('password')) {
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(this.password, salt);
-        this.password = hashedPassword;
-        next();
+            if (this.isModified('password')) {
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = await bcrypt.hash(this.password, salt);
+            this.password = hashedPassword;
+            next();
         }
         next();
     } catch (error) {

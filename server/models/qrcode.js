@@ -13,7 +13,7 @@ const QrcodeSchema = new mongoose.Schema({
         trim: true,
     },
     workDuration: {
-        type: Date,
+        type: String,
         trim: true,
     },
     latency: {

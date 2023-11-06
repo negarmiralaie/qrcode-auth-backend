@@ -36,21 +36,38 @@ const vacationController = {
     },
     update: async (req, res) => {
         try {
-            const { personId } = req.params;
+            // const { personId } = req.params;
+            const { vacationId } = req.query;
             const { status } = req.body;
             console.log('req.body: ', req.body);
-            console.log('personId: ', personId);
+            console.log('persvacationIdonId: ', vacationId);
 
-            const vacation = await vacationDb.updateMany({ id: personId }, { $set: {status} });
+            // const filter = {
+            //     person: personId,
+            //     entranceDate: {
+            //         $gte: today,
+            //         $lt: tomorrow
+            //     }
+            // };
+
+
+            const update = {
+                $set: {
+                  status
+                },
+              };
+              
+              const vacation = await vacationDb.updateOne({ _id: vacationId }, update);
+              
+
             console.log('vacation: ', vacation);
 
             return res.status(200).json({
-                message: 'Vacation is successfully created',
-                // vacation,
+                message: 'Vacation is successfully updated',
             });
         } catch (error) {
             console.log('error: ', error);
-            throw createError(500, 'Vacation could not be created');
+            throw createError(500, 'Vacation could not be updated');
         }
     },
     getVacationsById: async (req, res) => {
@@ -73,7 +90,7 @@ const vacationController = {
     getVacationsOfAllPeople: async (req, res) => {
         try {
             // Get the filter parameters from the request query
-            const { personId, persianStartDate, persianEndDate, vacationDate, status, requestDate, type, duration, fname, lname } = req.query;
+            const { username, persianStartDate, persianEndDate, vacationDate, status, requestDate, type, duration, fname, lname } = req.query;
 
             //& convert the Persian dates to Gregorian dates.
             const startDate = persianStartDate ? moment(persianStartDate, 'jYYYY/jMM/jDD').format('YYYY-MM-DD') : undefined;
@@ -86,7 +103,11 @@ const vacationController = {
             if (status) filter.status = status;
             if (type) filter.type = type;
             if (duration) filter.duration = duration;
-            if (personId) filter.person = personId;
+            if(username) {
+                const person = await personDb.findOne({ username });
+                const personId = person._id;
+                if (personId) filter.person = personId;
+            }
             // if (fname) filter['person.fname'] = { $regex: new RegExp(fname, 'i') };
             if (fname) filter['person.fname'] = fname;
             // if (lname) filter['person.lname'] = { $regex: new RegExp(lname, 'i') };
